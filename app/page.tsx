@@ -79,6 +79,73 @@ function parseSoapSections(text: string, lang: UiLang): SoapSection[] | null {
   return headers.map((h) => ({ header: h, body: byHeader.get(h) ?? "" }));
 }
 
+function LanguageSwitch({
+  lang,
+  setLang,
+  className
+}: {
+  lang: UiLang;
+  setLang: (lang: UiLang) => void;
+  className?: string;
+}) {
+  const isEn = lang === "en";
+
+  return (
+    <div
+      className={[
+        "relative inline-flex rounded-xl border border-slate-200 bg-white/70 p-1 text-xs font-medium text-slate-700 shadow-sm backdrop-blur",
+        className
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      role="tablist"
+      aria-label="Language"
+    >
+      {/* Sliding indicator */}
+      <span
+        aria-hidden="true"
+        className={[
+          "pointer-events-none absolute bottom-1 top-1 left-1 w-[calc(50%-0.25rem)] rounded-lg",
+          "bg-amber-100 shadow-sm ring-1 ring-amber-200",
+          "transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] will-change-transform",
+          "motion-reduce:transition-none",
+          isEn ? "translate-x-full" : "translate-x-0"
+        ].join(" ")}
+      />
+
+      <button
+        type="button"
+        onClick={() => setLang("sv")}
+        className={[
+          "relative z-10 rounded-lg px-3 py-1.5",
+          "transition-[color,transform] duration-200",
+          "motion-reduce:transition-none",
+          "active:scale-[0.98]",
+          lang === "sv" ? "text-slate-900" : "text-slate-600 hover:text-slate-900"
+        ].join(" ")}
+        aria-pressed={lang === "sv"}
+      >
+        Svenska
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setLang("en")}
+        className={[
+          "relative z-10 rounded-lg px-3 py-1.5",
+          "transition-[color,transform] duration-200",
+          "motion-reduce:transition-none",
+          "active:scale-[0.98]",
+          lang === "en" ? "text-slate-900" : "text-slate-600 hover:text-slate-900"
+        ].join(" ")}
+        aria-pressed={lang === "en"}
+      >
+        English
+      </button>
+    </div>
+  );
+}
+
 export default function Page() {
   const [lang, setLang] = useState<UiLang>("sv");
   const [text, setText] = useState("");
@@ -239,36 +306,7 @@ export default function Page() {
             </div>
             <div className="hidden sm:block">
               <div className="flex items-center gap-3">
-                <div
-                  className="inline-flex rounded-xl border border-slate-200 bg-white/70 p-1 text-xs font-medium text-slate-700 shadow-sm backdrop-blur"
-                  role="tablist"
-                  aria-label="Language"
-                >
-                  <button
-                    type="button"
-                    onClick={() => setLang("sv")}
-                    className={`rounded-lg px-3 py-1 transition ${
-                      lang === "sv"
-                        ? "bg-amber-100 text-slate-900 shadow-sm"
-                        : "hover:bg-slate-50"
-                    }`}
-                    aria-pressed={lang === "sv"}
-                  >
-                    Svenska
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLang("en")}
-                    className={`rounded-lg px-3 py-1 transition ${
-                      lang === "en"
-                        ? "bg-amber-100 text-slate-900 shadow-sm"
-                        : "hover:bg-slate-50"
-                    }`}
-                    aria-pressed={lang === "en"}
-                  >
-                    English
-                  </button>
-                </div>
+                <LanguageSwitch lang={lang} setLang={setLang} />
                 <div className="rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs text-slate-700 shadow-sm backdrop-blur">
                   {copy.disclaimer}
                 </div>
@@ -393,10 +431,23 @@ export default function Page() {
 
             <div className="mt-3 min-h-[24rem] rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
               {soapSections ? (
-                <div className={soapByLang[lang] ? "animate-fade-in" : ""}>
+                <div>
                   <div className="divide-y divide-slate-200/70">
-                    {soapSections.map((section) => (
-                      <section key={section.header} className="py-4 first:pt-0 last:pb-0">
+                    {soapSections.map((section, idx) => (
+                      <section
+                        key={section.header}
+                        className={[
+                          "py-4 first:pt-0 last:pb-0",
+                          soapByLang[lang]
+                            ? "animate-stagger-fade-up motion-reduce:animate-none"
+                            : ""
+                        ].join(" ")}
+                        style={
+                          soapByLang[lang]
+                            ? ({ ["--stagger-delay" as any]: `${idx * 120}ms` } as React.CSSProperties)
+                            : undefined
+                        }
+                      >
                         <h3
                           className={
                             lang === "en"
@@ -424,36 +475,7 @@ export default function Page() {
 
         <footer className="mt-8 text-xs text-slate-500 sm:hidden">
           <div className="flex flex-col gap-3">
-            <div
-              className="inline-flex w-fit rounded-xl border border-slate-200 bg-white/70 p-1 text-xs font-medium text-slate-700 shadow-sm backdrop-blur"
-              role="tablist"
-              aria-label="Language"
-            >
-              <button
-                type="button"
-                onClick={() => setLang("sv")}
-                className={`rounded-lg px-3 py-1 transition ${
-                  lang === "sv"
-                    ? "bg-amber-100 text-slate-900 shadow-sm"
-                    : "hover:bg-slate-50"
-                }`}
-                aria-pressed={lang === "sv"}
-              >
-                Svenska
-              </button>
-              <button
-                type="button"
-                onClick={() => setLang("en")}
-                className={`rounded-lg px-3 py-1 transition ${
-                  lang === "en"
-                    ? "bg-amber-100 text-slate-900 shadow-sm"
-                    : "hover:bg-slate-50"
-                }`}
-                aria-pressed={lang === "en"}
-              >
-                English
-              </button>
-            </div>
+            <LanguageSwitch lang={lang} setLang={setLang} className="w-fit" />
             <div>{copy.disclaimer}</div>
           </div>
         </footer>

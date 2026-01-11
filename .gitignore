@@ -23,4 +23,10 @@ pnpm-debug.log*
 .DS_Store
 .turbo/
 
+# TypeScript incremental build info
+tsconfig.tsbuildinfo
+
+# local temp artifacts
+.tmp/
+
 
